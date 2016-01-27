@@ -303,6 +303,7 @@ posix: all $(POSIX_OBJ)
 
 TEST_ELF= test/picoapp.elf
 TEST6_ELF= test/picoapp6.elf
+ECHRONOSTEST_ELF= test/echronostest.elf
 
 
 test: posix
@@ -316,6 +317,15 @@ test: posix
 	@install $(PREFIX)/$(TEST_ELF) $(PREFIX)/$(TEST6_ELF)
 
 tst: test
+
+echronostest: posix
+	@mkdir -p $(PREFIX)/test/
+	@make -C test/examples PREFIX=$(PREFIX)
+	@echo -e "\t[CC] echronostest.o"
+	@$(CC) -c -o $(PREFIX)/examples/echronostest.o test/echronostest.c $(CFLAGS) -Itest/examples
+	@echo -e "\t[LD] $@"
+	@$(CC) -g -o $(ECHRONOSTEST_ELF) -I include -I modules -I $(PREFIX)/include $(CFLAGS) -Wl,--start-group $(TEST_LDFLAGS) $(TEST_OBJ) $(PREFIX)/examples/*.o -Wl,--end-group -m32
+	@mv test/*.elf $(PREFIX)/test
 
 $(PREFIX)/include/pico_defines.h:
 	@mkdir -p $(PREFIX)/lib
