@@ -1,6 +1,9 @@
 PREFIX?=../../build
 CFLAGS+=-I../../include/ -I../../modules -I../../build/include -I . -ggdb
-
+LBITS := $(shell getconf LONG_BIT)
+ifeq ($(LBITS),64)
+   CFLAGS+= -m32
+endif
 
 $(PREFIX)/examples/%.o: %.c 
 	@mkdir -p $(PREFIX)/examples

@@ -70,6 +70,10 @@ CFLAGS+= -Wcast-align
 CFLAGS+= -Wmissing-prototypes
 CFLAGS+= -Wno-missing-field-initializers
 
+LBITS := $(shell getconf LONG_BIT)
+ifeq ($(LBITS),64)
+   CFLAGS+= -m32
+endif
 
 ifeq ($(DEBUG),1)
   CFLAGS+=-ggdb
@@ -303,7 +307,7 @@ test: posix
 	@echo -e "\t[CC] picoapp.o"
 	@$(CC) -c -o $(PREFIX)/examples/picoapp.o test/picoapp.c $(CFLAGS) -Itest/examples
 	@echo -e "\t[LD] $@"
-	@$(CC) -g -o $(TEST_ELF) -I include -I modules -I $(PREFIX)/include -Wl,--start-group $(TEST_LDFLAGS) $(TEST_OBJ) $(PREFIX)/examples/*.o -Wl,--end-group
+	@$(CC) -g -o $(TEST_ELF) -I include -I modules -I $(PREFIX)/include $(CFLAGS) -Wl,--start-group $(TEST_LDFLAGS) $(TEST_OBJ) $(PREFIX)/examples/*.o -Wl,--end-group
 	@mv test/*.elf $(PREFIX)/test
 	@install $(PREFIX)/$(TEST_ELF) $(PREFIX)/$(TEST6_ELF)
 
