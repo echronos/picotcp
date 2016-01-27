@@ -168,6 +168,10 @@ ifeq ($(ARCH),atmega128)
   CFLAGS+=-Wall -mmcu=atmega128 -DAVR
 endif
 
+ifeq ($(ARCH),echronosrtos)
+  CFLAGS+=-DECHRONOSRTOS -m32
+endif
+
 ifeq ($(ARCH),none)
   CFLAGS+=-DARCHNONE
 endif
