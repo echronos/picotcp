@@ -49,6 +49,7 @@
 #endif
 
 #include "rtos-rigel.h"
+#include "machine-timer.h"
 
 void app_udpecho(char *args);
 void app_tcpecho(char *args);
@@ -675,6 +676,9 @@ int main(int argc, char **argv)
 #ifdef FAULTY
     atexit(memory_stats);
 #endif
+    printf("%s: starting timer tick\n", __FUNCTION__);
+    machine_timer_start();
+
     printf("%s: starting RTOS\n", __FUNCTION__);
     rtos_start();
 }
