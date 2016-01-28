@@ -672,8 +672,5 @@ int main(int argc, char **argv)
     atexit(memory_stats);
 #endif
     printf("%s: launching PicoTCP loop\n", __FUNCTION__);
-    while(1) {
-        pico_stack_tick();
-        usleep(2000);
-    }
+    pico_stack_loop();
 }
