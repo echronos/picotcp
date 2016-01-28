@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "rtos-rigel.h"
+
 #define dbg printf
 
 #define pico_zalloc(x) calloc(x, 1)
@@ -18,32 +20,22 @@
 
 static inline uint32_t PICO_TIME(void)
 {
-    struct timeval t;
-    gettimeofday(&t, NULL);
-  #ifdef TIME_PRESCALE
-    return (prescale_time < 0) ? (uint32_t)(t.tv_sec / 1000 << (-prescale_time)) : \
-           (uint32_t)(t.tv_sec / 1000 >> prescale_time);
-  #else
-    return (uint32_t)t.tv_sec;
-  #endif
+    const uint32_t time = (rtos_timer_current_ticks / 10);
+    /* printf("pico time: %d\n", time); */
+    return time;
 }
 
 static inline uint32_t PICO_TIME_MS(void)
 {
-    struct timeval t;
-    gettimeofday(&t, NULL);
-  #ifdef TIME_PRESCALER
-    uint32_t tmp = ((t.tv_sec * 1000) + (t.tv_usec / 1000));
-    return (prescale_time < 0) ? (uint32_t)(tmp / 1000 << (-prescale_time)) : \
-           (uint32_t)(tmp / 1000 >> prescale_time);
-  #else
-    return (uint32_t)((t.tv_sec * 1000) + (t.tv_usec / 1000));
-  #endif
+    const uint32_t time = (rtos_timer_current_ticks * 100);
+    /* printf("pico time ms: %d\n", time); */
+    return time;
 }
 
 static inline void PICO_IDLE(void)
 {
-    usleep(5000);
+    /* printf("pico idle\n"); */
+    rtos_sleep(1);
 }
 
 #endif  /* PICO_SUPPORT_ECHRONOSRTOS */
