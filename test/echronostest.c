@@ -76,6 +76,7 @@ void app_sendto_test(char *args);
 void app_noop(void);
 
 void task_one(void);
+void task_two(void);
 static void setup_tcp_server_socket(void);
 static void handle_socket_event(uint16_t ev, struct pico_socket *s);
 static void handle_socket_data(struct pico_socket *s);
@@ -688,6 +689,9 @@ int main(int argc, char **argv)
 
 void task_one(void)
 {
+    printf("%s: starting task two\n", __FUNCTION__);
+    rtos_task_start(RTOS_TASK_ID_TWO);
+
     printf("%s: setting up TCP server socket\n", __FUNCTION__);
     setup_tcp_server_socket();
 
@@ -762,5 +766,13 @@ static void handle_socket_data(struct pico_socket *const s)
         printf("---------\n");
     } else {
         printf("Socket error occurred: %s\n", strerror(pico_err));
+    }
+}
+
+void task_two(void)
+{
+    for (;;) {
+        printf("task two checking in\n");
+        rtos_sleep(100);
     }
 }
