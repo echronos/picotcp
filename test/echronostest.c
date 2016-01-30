@@ -48,6 +48,8 @@
 #include "pico_faulty.h"
 #endif
 
+#include "rtos-rigel.h"
+
 void app_udpecho(char *args);
 void app_tcpecho(char *args);
 void app_udpclient(char *args);
@@ -71,6 +73,8 @@ void app_slaacv4(char *args);
 void app_udpecho(char *args);
 void app_sendto_test(char *args);
 void app_noop(void);
+
+void task_one(void);
 
 struct pico_ip4 ZERO_IP4 = {
     0
@@ -671,6 +675,12 @@ int main(int argc, char **argv)
 #ifdef FAULTY
     atexit(memory_stats);
 #endif
+    printf("%s: starting RTOS\n", __FUNCTION__);
+    rtos_start();
+}
+
+void task_one(void)
+{
     printf("%s: launching PicoTCP loop\n", __FUNCTION__);
     pico_stack_loop();
 }
