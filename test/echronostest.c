@@ -76,6 +76,9 @@ void app_sendto_test(char *args);
 void app_noop(void);
 
 void task_one(void);
+static void setup_tcp_server_socket(void);
+static void handle_socket_event(uint16_t ev, struct pico_socket *s);
+static void handle_socket_data(struct pico_socket *s);
 
 struct pico_ip4 ZERO_IP4 = {
     0
@@ -685,6 +688,79 @@ int main(int argc, char **argv)
 
 void task_one(void)
 {
+    printf("%s: setting up TCP server socket\n", __FUNCTION__);
+    setup_tcp_server_socket();
+
     printf("%s: launching PicoTCP loop\n", __FUNCTION__);
     pico_stack_loop();
+}
+
+static void setup_tcp_server_socket(void)
+{
+    int ret;
+    struct pico_ip4 listen_addr = {0};
+    uint16_t listen_port = short_be(1111);
+    struct pico_socket *s = pico_socket_open(PICO_PROTO_IPV4, PICO_PROTO_TCP, handle_socket_event);
+    if (!s) {
+        printf("%s: error opening socket: %s\n", __FUNCTION__, strerror(pico_err));
+        exit(1);
+    }
+
+    ret = pico_socket_bind(s, &listen_addr, &listen_port);
+    if (ret < 0) {
+        printf("%s: error binding socket to port %u: %s\n", __FUNCTION__, short_be(listen_port), strerror(pico_err));
+        exit(1);
+    }
+
+    if (pico_socket_listen(s, 3) != 0) {
+        printf("%s: error listening on port %u\n", __FUNCTION__, short_be(listen_port));
+        exit(1);
+    }
+}
+
+static void handle_socket_event(const uint16_t ev, struct pico_socket *const s)
+{
+    if (ev & PICO_SOCK_EV_RD) {
+        printf("Socket ready to receive\n");
+        handle_socket_data(s);
+    }
+
+    if (ev & PICO_SOCK_EV_CONN) {
+        struct pico_ip4 client_addr;
+        uint16_t client_port;
+        printf("Socket connected\n");
+        (void)pico_socket_accept(s, &client_addr, &client_port);
+    }
+
+    if (ev & PICO_SOCK_EV_FIN) {
+        printf("Socket closed\n");
+    }
+
+    if (ev & PICO_SOCK_EV_ERR) {
+        printf("Socket error occurred: %s\n", strerror(pico_err));
+        exit(1);
+    }
+
+    if (ev & PICO_SOCK_EV_CLOSE) {
+        printf("Socket closed by peer\n");
+        pico_socket_shutdown(s, PICO_SHUT_WR);
+    }
+
+    if (ev & PICO_SOCK_EV_WR) {
+        printf("Socket ready to send\n");
+    }
+}
+
+static void handle_socket_data(struct pico_socket *const s)
+{
+    uint8_t bfr[128];
+    int ret = pico_socket_recv(s, bfr, sizeof(bfr) - 1);
+    if (ret >= 0) {
+        printf("---------\n");
+        bfr[ret] = '\0';
+        printf("%s", (char*)bfr);
+        printf("---------\n");
+    } else {
+        printf("Socket error occurred: %s\n", strerror(pico_err));
+    }
 }
