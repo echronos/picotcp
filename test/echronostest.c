@@ -771,8 +771,12 @@ static void handle_socket_data(struct pico_socket *const s)
 
 void task_two(void)
 {
+    rtos_timer_signal_set(RTOS_TIMER_ID_ONE, RTOS_TASK_ID_TWO, RTOS_SIGNAL_SET_ONE);
+    rtos_timer_reload_set(RTOS_TIMER_ID_ONE, 10);
+    rtos_timer_enable(RTOS_TIMER_ID_ONE);
+
     for (;;) {
         printf("task two checking in\n");
-        rtos_sleep(100);
+        rtos_signal_wait(RTOS_SIGNAL_ID_ONE);
     }
 }
