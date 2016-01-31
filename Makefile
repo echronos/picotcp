@@ -325,7 +325,7 @@ echronostest: posix
 	@echo -e "\t[CC] echronostest.o"
 	@$(CC) -c -o $(PREFIX)/examples/echronostest.o test/echronostest.c $(CFLAGS) -Itest/examples
 	@echo -e "\t[LD] $@"
-	@$(CC) -g -o $(ECHRONOSTEST_ELF) -I include -I modules -I $(PREFIX)/include -I$(ECHRONOSDIR) $(CFLAGS) -Wl,--start-group $(TEST_LDFLAGS) $(TEST_OBJ) $(PREFIX)/examples/*.o -Wl,--end-group -m32 $(ECHRONOSDIR)/system
+	@$(CC) -g -o $(ECHRONOSTEST_ELF) -I include -I modules -I $(PREFIX)/include -I$(ECHRONOSDIR) $(CFLAGS) -Wl,--start-group $(TEST_LDFLAGS) $(TEST_OBJ) $(PREFIX)/examples/*.o -Wl,--end-group -m32 $(ECHRONOSDIR)/system test/httpd.c
 	@mv test/*.elf $(PREFIX)/test
 
 $(PREFIX)/include/pico_defines.h:

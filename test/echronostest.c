@@ -50,6 +50,7 @@
 
 #include "rtos-rigel.h"
 #include "machine-timer.h"
+#include "httpd.h"
 
 void app_udpecho(char *args);
 void app_tcpecho(char *args);
@@ -76,10 +77,8 @@ void app_sendto_test(char *args);
 void app_noop(void);
 
 void task_one(void);
-void task_two(void);
 static void setup_tcp_server_socket(void);
 static void handle_socket_event(uint16_t ev, struct pico_socket *s);
-static void handle_socket_data(struct pico_socket *s);
 
 struct pico_ip4 ZERO_IP4 = {
     0
@@ -726,7 +725,7 @@ static void handle_socket_event(const uint16_t ev, struct pico_socket *const s)
 {
     if (ev & PICO_SOCK_EV_RD) {
         printf("Socket ready to receive\n");
-        handle_socket_data(s);
+        httpd_handle_request(s);
     }
 
     if (ev & PICO_SOCK_EV_CONN) {
@@ -752,31 +751,6 @@ static void handle_socket_event(const uint16_t ev, struct pico_socket *const s)
 
     if (ev & PICO_SOCK_EV_WR) {
         printf("Socket ready to send\n");
-    }
-}
-
-static void handle_socket_data(struct pico_socket *const s)
-{
-    uint8_t bfr[128];
-    int ret = pico_socket_recv(s, bfr, sizeof(bfr) - 1);
-    if (ret >= 0) {
-        printf("---------\n");
-        bfr[ret] = '\0';
-        printf("%s", (char*)bfr);
-        printf("---------\n");
-    } else {
-        printf("Socket error occurred: %s\n", strerror(pico_err));
-    }
-}
-
-void task_two(void)
-{
-    rtos_timer_signal_set(RTOS_TIMER_ID_ONE, RTOS_TASK_ID_TWO, RTOS_SIGNAL_SET_ONE);
-    rtos_timer_reload_set(RTOS_TIMER_ID_ONE, 10);
-    rtos_timer_enable(RTOS_TIMER_ID_ONE);
-
-    for (;;) {
-        printf("task two checking in\n");
-        rtos_signal_wait(RTOS_SIGNAL_ID_ONE);
+        httpd_provide_response(s);
     }
 }
